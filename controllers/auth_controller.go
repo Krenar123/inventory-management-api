@@ -17,7 +17,7 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(body.Password), 10)
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(body.Password), 10)
 
 	admin := models.Admin{
 		Email:    body.Email,

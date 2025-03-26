@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"inventory-management-api/controllers"
+	"inventory-management-api/middleware"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

@@ -9,11 +9,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CreateItem adds a new inventory item
 func CreateItem(c *gin.Context) {
 	var item models.InventoryItem
 	if err := c.ShouldBindJSON(&item); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": ErrInvalidRequest})
 		return
 	}
 	db.DB.Create(&item)
@@ -38,13 +37,13 @@ func RestockItem(c *gin.Context) {
 	}
 	id := c.Param("id")
 	if err := c.ShouldBindJSON(&request); err != nil || request.Amount < 10 || request.Amount > 1000 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Amount must be between 10 and 1000"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": ErrAmountRange})
 		return
 	}
 
 	var item models.InventoryItem
 	if err := db.DB.First(&item, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Item not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": ErrItemNotFound})
 		return
 	}
 
@@ -56,7 +55,7 @@ func RestockItem(c *gin.Context) {
 		Count(&count)
 
 	if count >= 3 {
-		c.JSON(http.StatusTooManyRequests, gin.H{"error": "Restock limit exceeded"})
+		c.JSON(http.StatusTooManyRequests, gin.H{"error": ErrRestockLimitExceeded})
 		return
 	}
 
@@ -79,7 +78,7 @@ func RestockHistory(c *gin.Context) {
 	if err := db.DB.Where("inventory_item_id = ?", id).
 		Order("created_at desc").
 		Find(&restocks).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Item not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": ErrItemNotFound})
 		return
 	}
 	c.JSON(http.StatusOK, restocks)
